@@ -38,7 +38,7 @@ func GetUserById(id int) (*models.UserSummary, error) {
 
 func GetAllUser() ([]models.UserSummary, error) {
 	var users []models.UserSummary
-	err := config.DB.Table("users").
+	err := config.DB.Model(&models.User{}).
 		Select(`users.id, users.username, users.role, users.is_active, users.is_pj,
 		        users.kandang_id, kandangs.nama AS nama_kandang`).
 		Joins(`LEFT JOIN kandangs ON users.kandang_id = kandangs.id`).
@@ -54,7 +54,7 @@ func GetAllUser() ([]models.UserSummary, error) {
 func GetUserByRole(role string) ([]models.UserSummary, error) {
 	var users []models.UserSummary
 
-	err := config.DB.Table("users").
+	err := config.DB.Model(&models.User{}).
 		Select(`users.id, users.username, users.role, users.is_active, users.is_pj,
 		        users.kandang_id, kandangs.nama AS nama_kandang`).
 		Joins(`LEFT JOIN kandangs ON users.kandang_id = kandangs.id`).
