@@ -4,11 +4,42 @@ import (
 	"backend-el-ternak/internal/config"
 	"backend-el-ternak/internal/models"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func CreateUser(user *models.User) error {
-	fmt.Println("dari repo:", user)
-	return config.DB.Create(user).Error
+	return config.DB.Transaction(func(tx *gorm.DB) error {
+
+        if user.IsPJ {
+            if user.KandangID == nil || *user.KandangID == 0 {
+                return fmt.Errorf("kandang_id wajib diisi jika user menjadi penanggung jawab")
+            }
+
+            kandangID := *user.KandangID
+
+            var oldPJ models.User
+            err := tx.
+                Where("kandang_id = ? AND is_pj = ?", kandangID, true).
+                First(&oldPJ).Error
+
+            if err == nil {
+                if oldPJ.ID != user.ID {
+                    if err := tx.Model(&oldPJ).Update("is_pj", false).Error; err != nil {
+                        return err
+                    }
+                }
+            } else if err != gorm.ErrRecordNotFound {
+                return err
+            }
+        }
+
+        if err := tx.Create(user).Error; err != nil {
+            return err
+        }
+
+        return nil
+    })
 }
 
 func GetUserByUsername(username string) (*models.User, error) {
@@ -70,18 +101,47 @@ func GetUserByRole(role string) ([]models.UserSummary, error) {
 
 
 func UpdateUserByUsername(username string, newData map[string]interface{}) error {
-	result := config.DB.Debug().Model(&models.User{}).Where("username = ?", username).Updates(newData)
+    return config.DB.Transaction(func(tx *gorm.DB) error {
+        var user models.User
+        if err := tx.Where("username = ?", username).First(&user).Error; err != nil {
+            return fmt.Errorf("user %s not found", username)
+        }
 
-	if result.Error != nil {
-		return result.Error
-	}
+        isBecomingPJ, ok := newData["is_pj"]
+        if ok && isBecomingPJ == true {
+            kandangID, hasKandang := newData["kandang_id"]
+            if !hasKandang {
+                kandangID = user.KandangID
+            }
 
-	if result.RowsAffected == 0 {
-		return fmt.Errorf("not found")
-	}
+            var oldPJ models.User
+            err := tx.
+                Where("kandang_id = ? AND is_pj = ?", kandangID, true).
+                First(&oldPJ).Error
 
-	return nil
+            if err == nil {
+                if oldPJ.ID != user.ID {
+                    if err := tx.Model(&oldPJ).Update("is_pj", false).Error; err != nil {
+                        return err
+                    }
+                }
+            } else if err != gorm.ErrRecordNotFound {
+                return err
+            }
+        }
+
+        result := tx.Model(&user).Updates(newData)
+        if result.Error != nil {
+            return result.Error
+        }
+        if result.RowsAffected == 0 {
+            return fmt.Errorf("not found")
+        }
+
+        return nil
+    })
 }
+
 
 func DeleteByUsername(username string) error  {
 	result := config.DB.Where("username = ?", username).Delete(&models.User{})

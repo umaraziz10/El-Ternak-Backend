@@ -4,23 +4,19 @@ import (
 	"backend-el-ternak/internal/models"
 	"backend-el-ternak/internal/repository"
 	"errors"
+	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
-func CreateUser(username, password, role string, isActive bool, kandangID *uint) error {
+func CreateUser(username, password, role string, isActive bool, kandangID *uint, isPj bool) error {
 	var user models.User
-	err := DB.Where("username = ?", username).First(&user).Error
+	tx := DB.Where("username = ?", username).First(&user)
 	
-	if err == nil {
-		return ErrUserExists
-	}
-
-	if err != gorm.ErrRecordNotFound {
-		return err
-	}
+	if tx.RowsAffected > 0 {
+        return ErrUserExists
+    }
 	
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
@@ -34,7 +30,10 @@ func CreateUser(username, password, role string, isActive bool, kandangID *uint)
 		Role: role,
 		IsActive: isActive,
 		KandangID: kandangID,
+		IsPJ: isPj,
 	}
+
+	fmt.Println("aman bang sampe sini")
 
 	return repository.CreateUser(newUser)
 }
