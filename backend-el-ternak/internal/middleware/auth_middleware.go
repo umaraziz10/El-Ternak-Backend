@@ -12,7 +12,7 @@ import (
 )
 
 type UserContext struct {
-	ID int
+	ID uint
 	Username string
 	Role string
 }
@@ -39,7 +39,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		}
 		
 		ctx := context.WithValue(r.Context(), "user", UserContext{
-			ID: int(claims["id"].(float64)),
+			ID: uint(claims["id"].(float64)),
 			Username: claims["username"].(string),
 			Role: claims["role"].(string),
 		})

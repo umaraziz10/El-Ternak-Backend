@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-func GetUserProfile(id int) (*models.UserSummary, error)  {
+func GetUserProfile(id uint) (*models.UserSummary, error)  {
 	user, err := repository.GetUserById(id)
 	if err != nil {
 		return nil, errors.New("user not found")

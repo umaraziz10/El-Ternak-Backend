@@ -22,7 +22,7 @@ func GetUserByUsername(username string) (*models.User, error) {
 	return &user, nil
 }
 
-func GetUserById(id int) (*models.UserSummary, error) {
+func GetUserById(id uint) (*models.UserSummary, error) {
 	var user models.UserSummary
 	err := config.DB.Model(&models.User{}).
 	Select("id", "username", "role", "is_active", "is_pj", "kandang_id").
