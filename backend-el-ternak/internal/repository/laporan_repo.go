@@ -160,6 +160,21 @@ func GetLaporanFiltered(kandang_id uint, periode, tanggal string) ([]models.Lapo
 	return laporans, nil
 }
 
+func GetMyLaporan(user_id uint) ([]models.LaporanSummary, error) {
+	var laporans []models.LaporanSummary
+	query := config.DB.Table("laporans").
+	Select("laporans.id", "users.username AS pencatat", "laporans.kandang_id", "TO_CHAR(laporans.created_at, 'YYYY-MM-DD') AS tanggal", "TO_CHAR(laporans.created_at, 'HH24:MI') AS jam", "laporans.rata_bobot_ayam", "laporans.kematian_ayam", "laporans.pakan_used").
+	Where("laporans.user_id = ?", user_id).
+	Joins("LEFT JOIN users ON users.id = laporans.user_id")
+
+	err := query.Scan(&laporans).Error
+	if err != nil {
+		return nil , err
+	}
+
+	return laporans, nil
+}
+
 func UpdateLaporanByID(laporan_id uint, newData map[string]interface{}) error {
 	tx := config.DB.Begin()
 	

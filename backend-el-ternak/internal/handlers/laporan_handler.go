@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend-el-ternak/internal/middleware"
 	"backend-el-ternak/internal/services"
 	"backend-el-ternak/utils"
 	"encoding/json"
@@ -151,4 +152,19 @@ func HandleLaporanByID(w http.ResponseWriter, r *http.Request) {
 	default:
 		utils.RespondError(w, http.StatusMethodNotAllowed, "method tidak diizinkan")
 	}
+}
+
+func GetMyLaporan(w http.ResponseWriter, r *http.Request) {
+	userCtx, ok := r.Context().Value("user").(middleware.UserContext)
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "invalid context")
+		return
+	}
+	laporans, err := services.GetMyLaporan(userCtx.ID)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "gagal mengambil data kandang")
+		return
+	}
+
+	utils.RespondSuccess(w, http.StatusOK, "berhasil mengambil data kandang", laporans)
 }

@@ -62,6 +62,15 @@ func GetLaporanFiltered(kandang_id uint, periode, tanggal string) ([]models.Lapo
 	return laporans, nil
 }
 
+func GetMyLaporan(user_id uint) ([]models.LaporanSummary, error) {
+	laporans, err := repository.GetMyLaporan(user_id)
+	if err != nil {
+		return nil , err 
+	}
+
+	return laporans, nil
+}
+
 func UpdateLaporanByID(laporan_id uint, newData map[string]interface{}) error {
 	err := repository.UpdateLaporanByID(laporan_id, newData)
 	if err != nil {

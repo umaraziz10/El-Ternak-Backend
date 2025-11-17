@@ -20,6 +20,10 @@ func LaporanRoutes(r *mux.Router) {
 		middleware.RoleMiddleware("petinggi", "pegawai")(http.HandlerFunc(handlers.GetLaporanHandler)),
 	)).Methods("GET")
 
+	laporan.Handle("/me", middleware.JwtMiddleware(
+		middleware.RoleMiddleware("pegawai")(http.HandlerFunc(handlers.GetMyLaporan)),
+	)).Methods("GET")
+
 	laporan.Handle("/create", middleware.JwtMiddleware(
 		middleware.RoleMiddleware("petinggi", "pegawai")(http.HandlerFunc(handlers.CreateLaporan)),
 	)).Methods("POST")
@@ -31,5 +35,4 @@ func LaporanRoutes(r *mux.Router) {
 	laporan.Handle("/kandang/{id}", middleware.JwtMiddleware(
 		middleware.RoleMiddleware("petinggi", "pegawai")(http.HandlerFunc(handlers.GetLaporanHandler)),
 	)).Methods("GET")
-
 }
