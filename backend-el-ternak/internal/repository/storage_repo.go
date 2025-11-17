@@ -49,12 +49,19 @@ func CheckPakanStock() (*models.CheckPakanResponse, error) {
 	var response models.CheckPakanResponse
 	pakan_per_1000_ayam_per_hari := 85
 
-	var pakan int
+	type Summary struct {
+		Stock int
+		Used int
+	}
+
+	var pakan Summary
 	if err := config.DB.Model(&models.Pakan{}).
-	Select("COALESCE(SUM(stock),0)").
+	Select("COALESCE(SUM(stock),0) as stock, COALESCE(SUM(used),0) as used").
 	Scan(&pakan).Error; err != nil {
 		return nil, err
 	}
+
+	sisa := pakan.Stock - pakan.Used
 
 	var populasi int
 	if err := config.DB.Model(&models.Kandang{}).
@@ -69,7 +76,7 @@ func CheckPakanStock() (*models.CheckPakanResponse, error) {
 	day_left := int(firstOfNextMonth.Sub(now).Hours() / 24)
 	threshold_stock_min := ((populasi / 1000) * pakan_per_1000_ayam_per_hari) * day_left
 
-	response.Alert = pakan <= threshold_stock_min
+	response.Alert = sisa <= threshold_stock_min
 
 	if !response.Alert {
 		return &response, nil
@@ -77,7 +84,7 @@ func CheckPakanStock() (*models.CheckPakanResponse, error) {
 
 	item := "pakan"
 	response.Item = &item
-	response.Sisa = &pakan
+	response.Sisa = &sisa
 	response.Day = &day_left
 
 	return &response, nil
