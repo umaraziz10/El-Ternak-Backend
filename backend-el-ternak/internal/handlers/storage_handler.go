@@ -16,13 +16,13 @@ func GetCurrentStock(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckPakanStock(w http.ResponseWriter, r * http.Request) {
-	status, err := services.CheckPakanStock()
+	data, err := services.CheckPakanStock()
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "gagal check pakan stock")
 		return
 	}
 
-	utils.RespondSuccess(w, http.StatusOK, "berhasil check stock storage", status)
+	utils.RespondSuccess(w, http.StatusOK, "berhasil check stock storage", data)
 }
 
 func GetYearlyReport(w http.ResponseWriter, r *http.Request) {

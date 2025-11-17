@@ -51,3 +51,10 @@ type StorageReport struct {
 	Sekam MonthlyReport `json:"sekam"`
 	OVK MonthlyReport `json:"ovk"`
 }
+
+type CheckPakanResponse struct {
+	Alert bool `json:"alert"`
+	Item *string `json:"item,omitempty"`
+	Sisa *int `json:"sisa_pakan,omitempty"`
+	Day *int `json:"sisa_hari_ke_akhir_bulan,omitempty"`
+}

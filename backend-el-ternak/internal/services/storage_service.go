@@ -14,13 +14,13 @@ func GetCurrentStock() (*models.StorageResponse, error) {
 	return stocks, nil
 }
 
-func CheckPakanStock() (bool, error) {
-	status, err := repository.CheckPakanStock()
+func CheckPakanStock() (*models.CheckPakanResponse, error) {
+	data, err := repository.CheckPakanStock()
 	if err != nil {
-		return false, err
+		return data, err
 	}
 
-	return status, nil
+	return data, nil
 }
 
 func GetYearlyReport(tahun string) (*models.StorageReport, error) {
