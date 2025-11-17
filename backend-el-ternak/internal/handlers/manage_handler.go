@@ -47,6 +47,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		Role string `json:"role"`
 		IsActive bool `json:"isActive"`
 		KandangID *uint `json:"kandangID"`
+		IsPj bool `json:"isPj"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -61,7 +62,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := services.CreateUser(req.Username, req.Password, newRole, req.IsActive ,req.KandangID)
+	err := services.CreateUser(req.Username, req.Password, newRole, req.IsActive ,req.KandangID, req.IsPj)
 	if err != nil {
 		if errors.Is(err, services.ErrUserExists) {
 			utils.RespondError(w, http.StatusConflict, "username telah terdaftar")
@@ -80,6 +81,8 @@ func EditPegawai(w http.ResponseWriter, r *http.Request)  {
 		Username string `json:"username"`
 		Role string `json:"role"`
 		IsActive bool `json:"isActive"`
+		KandangId uint `json:"kandangID"`
+		IsPj bool `json:"isPJ"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -97,6 +100,8 @@ func EditPegawai(w http.ResponseWriter, r *http.Request)  {
 		"username" : req.Username,
 		"role" : newRole,
 		"is_active": req.IsActive,
+		"kandang_id": req.KandangId,
+		"is_pj": req.IsPj,
 	}
 
 	err := services.UpdateUserByUsername(req.Username, newData)
