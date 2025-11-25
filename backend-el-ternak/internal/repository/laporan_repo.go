@@ -22,6 +22,15 @@ func CreateLaporan(laporan *models.Laporan) error {
 		tx.Rollback()
 		return err
 	}
+
+	if laporan.Sekam_used > storage.Sekam_stock {
+		tx.Rollback()
+		return fmt.Errorf("penggunaan sekam melebihi stock")
+	}
+	if laporan.Solar_used > storage.Solar_stock {
+		tx.Rollback()
+		return fmt.Errorf("penggunaan solar melebihi stock")
+	}
 	storage.Sekam_used += laporan.Sekam_used
 	storage.Solar_used += laporan.Solar_used
 	storage.Sekam_stock -= laporan.Sekam_used
@@ -33,6 +42,11 @@ func CreateLaporan(laporan *models.Laporan) error {
 		tx.Rollback()
 		return err
 	}
+
+	if laporan.Obat_used > ovk.Stock{
+		tx.Rollback()
+		return fmt.Errorf("penggunaan obat melebihi stock")
+	}
 	ovk.Used += laporan.Obat_used
 	ovk.Stock -= laporan.Obat_used
 
@@ -41,6 +55,11 @@ func CreateLaporan(laporan *models.Laporan) error {
 	if err := tx.Where("nama = ?", laporan.Pakan_tipe).First(&pakan).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	if laporan.Pakan_used > pakan.Stock{
+		tx.Rollback()
+		return fmt.Errorf("penggunaan pakan melebihi stock")
 	}
 	pakan.Used += laporan.Pakan_used
 	pakan.Stock -= laporan.Pakan_used
